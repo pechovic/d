@@ -1,0 +1,62 @@
+using System;
+using System.Collections.Generic;
+
+// Define a custom attribute
+[AttributeUsage(AttributeTargets.Property)]
+public class CustomAttribute : Attribute
+{
+    public string Name { get; }
+
+    public CustomAttribute(string name)
+    {
+        Name = name;
+    }
+}
+
+// Define a class with properties decorated with the custom attribute
+public class MyClass
+{
+    [Custom("Attribute 1")]
+    public int Property1 { get; set; }
+
+    [Custom("Attribute 2")]
+    public string Property2 { get; set; }
+
+    [Custom("Attribute 3")]
+    public double Property3 { get; set; }
+}
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        // Instantiate the class
+        MyClass myObject = new MyClass();
+
+        // Get all properties of the class
+        var properties = typeof(MyClass).GetProperties();
+
+        // Create a list to store attribute names
+        List<string> attributeNames = new List<string>();
+
+        // Iterate through each property and get its attributes
+        foreach (var property in properties)
+        {
+            // Get all attributes of the property
+            var attributes = property.GetCustomAttributes(typeof(CustomAttribute), false);
+
+            // If the property has the custom attribute, add its name to the list
+            if (attributes.Length > 0)
+            {
+                CustomAttribute customAttribute = (CustomAttribute)attributes[0];
+                attributeNames.Add(customAttribute.Name);
+            }
+        }
+
+        // Iterate through the list of attribute names
+        foreach (var attributeName in attributeNames)
+        {
+            Console.WriteLine(attributeName);
+        }
+    }
+}
