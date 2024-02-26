@@ -117,3 +117,53 @@ input[type="submit"]:hover {
 }
 
 
+
+
+
+
+
+/* Table Style */
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+th {
+  background-color: #f2f2f2;
+}
+
+/* 3D Effect */
+table {
+  border: 1px solid #d3d3d3;
+  border-radius: 5px;
+}
+
+th, td {
+  transition: all 0.3s;
+}
+
+th {
+  background-color: #f2f2f2;
+}
+
+tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+tr:hover {
+  background-color: #ddd;
+}
+
+/* Row Highlight on Hover */
+tr:hover td {
+  transform: translateY(-3px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+
+
