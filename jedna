@@ -1,169 +1,79 @@
-using System;
-using System.Collections.Generic;
+<form class="custom-form">
+    <div class="form-row">
+        <label for="textInput">Field Name <span class="description">(Short Description)</span></label>
+        <input type="text" id="textInput" name="textInput">
+    </div>
+    <div class="form-actions">
+        <button type="button" class="btn cancel">Cancel</button>
+        <button type="submit" class="btn save">Save</button>
+    </div>
+</form>
 
-// Define a custom attribute
-[AttributeUsage(AttributeTargets.Property)]
-public class CustomAttribute : Attribute
-{
-    public string Name { get; }
 
-    public CustomAttribute(string name)
-    {
-        Name = name;
-    }
-}
 
-// Define a class with properties decorated with the custom attribute
-public class MyClass
-{
-    [Custom("Attribute 1")]
-    public int Property1 { get; set; }
-
-    [Custom("Attribute 2")]
-    public string Property2 { get; set; }
-
-    [Custom("Attribute 3")]
-    public double Property3 { get; set; }
-}
-
-class Program
-{
-    static void Main(string[] args)
-    {
-        // Instantiate the class
-        MyClass myObject = new MyClass();
-
-        // Get all properties of the class
-        var properties = typeof(MyClass).GetProperties();
-
-        // Create a list to store attribute names
-        List<string> attributeNames = new List<string>();
-
-        // Iterate through each property and get its attributes
-        foreach (var property in properties)
-        {
-            // Get all attributes of the property
-            var attributes = property.GetCustomAttributes(typeof(CustomAttribute), false);
-
-            // If the property has the custom attribute, add its name to the list
-            if (attributes.Length > 0)
-            {
-                CustomAttribute customAttribute = (CustomAttribute)attributes[0];
-                attributeNames.Add(customAttribute.Name);
-            }
-        }
-
-        // Iterate through the list of attribute names
-        foreach (var attributeName in attributeNames)
-        {
-            Console.WriteLine(attributeName);
-        }
-    }
-}
-
-body {
+.custom-form {
     font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
+    max-width: 600px;
+    margin: 0 auto;
     padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-h2 {
-    color: #333;
+.form-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
 }
 
-form {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+.form-row label {
+    flex: 1;
+    margin-right: 20px;
 }
 
-label {
-    font-weight: bold;
-}
-
-input[type="text"],
-input[type="email"],
-textarea {
-    width: 100%;
-    padding: 10px;
-    margin: 5px 0;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box; /* Ensure that padding and border are included in the element's total width and height */
-}
-
-textarea {
-    height: 100px; /* Set the height of the textarea */
-}
-
-input[type="submit"] {
-    background-color: #007bff;
-    color: #fff;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-input[type="submit"]:hover {
-    background-color: #0056b3;
-}
-
-/* Optional: Style error messages */
-.text-danger {
-    color: #ff0000;
+.form-row .description {
     font-size: 0.8em;
+    color: #666;
 }
 
-
-
-
-
-
-
-/* Table Style */
-table {
-  border-collapse: collapse;
-  width: 100%;
+input[type="text"] {
+    flex: 2;
+    padding: 10px;
+    font-size: 1em;
+    border: 1px solid #ccc;
+    border-radius: 5px;
 }
 
-th, td {
-  border: 1px solid #ddd;
-  padding: 8px;
+.form-actions {
+    text-align: right;
 }
 
-th {
-  background-color: #f2f2f2;
+.btn {
+    padding: 10px 20px;
+    font-size: 1em;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    margin-left: 10px;
 }
 
-/* 3D Effect */
-table {
-  border: 1px solid #d3d3d3;
-  border-radius: 5px;
+.btn.cancel {
+    background-color: #f44336;
+    color: white;
 }
 
-th, td {
-  transition: all 0.3s;
+.btn.save {
+    background-color: #4CAF50;
+    color: white;
 }
 
-th {
-  background-color: #f2f2f2;
+/* Adding a little bit of responsiveness */
+@media (max-width: 768px) {
+    .form-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .form-row label {
+        margin-bottom: 10px;
+    }
 }
-
-tr:nth-child(even) {
-  background-color: #f2f2f2;
-}
-
-tr:hover {
-  background-color: #ddd;
-}
-
-/* Row Highlight on Hover */
-tr:hover td {
-  transform: translateY(-3px);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-
-
