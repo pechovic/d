@@ -1,79 +1,20 @@
-<form class="custom-form">
-    <div class="form-row">
-        <label for="textInput">Field Name <span class="description">(Short Description)</span></label>
-        <input type="text" id="textInput" name="textInput">
-    </div>
-    <div class="form-actions">
-        <button type="button" class="btn cancel">Cancel</button>
-        <button type="submit" class="btn save">Save</button>
-    </div>
-</form>
+def try_allocate_16gb():
+    target_size_gb = 16  # Target size in GB
+    chunk_size_mb = 100  # Size of each chunk in MB
+    chunks = 1024 * target_size_gb // chunk_size_mb  # Calculate the number of chunks needed
 
+    allocated_memory = []
+    try:
+        for _ in range(chunks):
+            # Allocate a chunk of approximately 100MB (1024 * 1024 bytes * 100)
+            allocated_memory.append(b'\x00' * (1024 * 1024 * chunk_size_mb))
+        return True
+    except MemoryError:
+        return False
 
+# Attempt to allocate 16GB of memory
+if try_allocate_16gb():
+    print("Successfully allocated approximately 16GB of memory.")
+else:
+    print("Failed to allocate 16GB of memory. Encountered a memory error.")
 
-.custom-form {
-    font-family: Arial, sans-serif;
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 20px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-.form-row {
-    display: flex;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.form-row label {
-    flex: 1;
-    margin-right: 20px;
-}
-
-.form-row .description {
-    font-size: 0.8em;
-    color: #666;
-}
-
-input[type="text"] {
-    flex: 2;
-    padding: 10px;
-    font-size: 1em;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
-
-.form-actions {
-    text-align: right;
-}
-
-.btn {
-    padding: 10px 20px;
-    font-size: 1em;
-    border-radius: 5px;
-    border: none;
-    cursor: pointer;
-    margin-left: 10px;
-}
-
-.btn.cancel {
-    background-color: #f44336;
-    color: white;
-}
-
-.btn.save {
-    background-color: #4CAF50;
-    color: white;
-}
-
-/* Adding a little bit of responsiveness */
-@media (max-width: 768px) {
-    .form-row {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .form-row label {
-        margin-bottom: 10px;
-    }
-}
