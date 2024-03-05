@@ -2,10 +2,16 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Assuming 'data' is your DataFrame after loading the CSV and processing datetime columns
+# Load the CSV file
+file_path = 'path_to_your_file.csv'  # Update this path to your CSV file location
+data = pd.read_csv(file_path)
+
+# Convert 'Started' and 'Stopped' columns to datetime objects
+data['Started'] = pd.to_datetime(data['Started'])
+data['Stopped'] = pd.to_datetime(data['Stopped'])
 
 # Create a time range from the earliest 'Started' to the latest 'Stopped'
-# Here, we generate time points at 1-minute intervals for simplicity
+# Generating time points at 1-minute intervals
 time_range = pd.date_range(start=data['Started'].min(), end=data['Stopped'].max(), freq='T')
 
 # Function to count running applications at each time point
