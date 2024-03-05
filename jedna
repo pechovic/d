@@ -1,26 +1,26 @@
-import matplotlib.pyplot as plt
 import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
 
-# Assuming 'data' is your DataFrame after loading the CSV and processing datetime
+# Assuming 'data' is your DataFrame after loading the CSV and processing datetime columns
 
-# Plot setup
-fig, ax1 = plt.subplots()
+# Create a time range from the earliest 'Started' to the latest 'Stopped'
+# Here, we generate time points at 1-minute intervals for simplicity
+time_range = pd.date_range(start=data['Started'].min(), end=data['Stopped'].max(), freq='T')
 
-# Create the first Y-axis for CPU units
-color = 'tab:red'
-ax1.set_xlabel('Time')
-ax1.set_ylabel('CPU Units', color=color)
-ax1.plot(data['Started'], data['CpuUnits'], color=color, label='CPU Units')
-ax1.tick_params(axis='y', labelcolor=color)
+# Function to count running applications at each time point
+def count_running_apps(time_point, data):
+    return np.sum((data['Started'] <= time_point) & (data['Stopped'] >= time_point))
 
-# Instantiate a second Y-axis sharing the same X-axis
-ax2 = ax1.twinx()  
-color = 'tab:blue'
-ax2.set_ylabel('MemoryMB', color=color)  # we already handled the x-label with ax1
-ax2.plot(data['Started'], data['MemoryMB'], color=color, label='Memory (MB)')
-ax2.tick_params(axis='y', labelcolor=color)
+# Count the number of running applications for each time point
+running_apps_counts = [count_running_apps(time, data) for time in time_range]
 
-# Title and show plot
-plt.title('CPU and Memory Usage Over Time')
-fig.tight_layout()  # adjust subplot parameters to give specified padding
+# Plotting the graph
+fig, ax = plt.subplots()
+ax.plot(time_range, running_apps_counts, label='Running Applications')
+ax.set_xlabel('Time')
+ax.set_ylabel('Number of Running Applications')
+plt.xticks(rotation=45)  # Rotate date labels for better readability
+plt.title('Number of Running Applications Over Time')
+plt.legend()
 plt.show()
