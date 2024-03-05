@@ -1,20 +1,26 @@
-def try_allocate_16gb():
-    target_size_gb = 16  # Target size in GB
-    chunk_size_mb = 100  # Size of each chunk in MB
-    chunks = 1024 * target_size_gb // chunk_size_mb  # Calculate the number of chunks needed
+import matplotlib.pyplot as plt
+import pandas as pd
 
-    allocated_memory = []
-    try:
-        for _ in range(chunks):
-            # Allocate a chunk of approximately 100MB (1024 * 1024 bytes * 100)
-            allocated_memory.append(b'\x00' * (1024 * 1024 * chunk_size_mb))
-        return True
-    except MemoryError:
-        return False
+# Assuming 'data' is your DataFrame after loading the CSV and processing datetime
 
-# Attempt to allocate 16GB of memory
-if try_allocate_16gb():
-    print("Successfully allocated approximately 16GB of memory.")
-else:
-    print("Failed to allocate 16GB of memory. Encountered a memory error.")
+# Plot setup
+fig, ax1 = plt.subplots()
 
+# Create the first Y-axis for CPU units
+color = 'tab:red'
+ax1.set_xlabel('Time')
+ax1.set_ylabel('CPU Units', color=color)
+ax1.plot(data['Started'], data['CpuUnits'], color=color, label='CPU Units')
+ax1.tick_params(axis='y', labelcolor=color)
+
+# Instantiate a second Y-axis sharing the same X-axis
+ax2 = ax1.twinx()  
+color = 'tab:blue'
+ax2.set_ylabel('MemoryMB', color=color)  # we already handled the x-label with ax1
+ax2.plot(data['Started'], data['MemoryMB'], color=color, label='Memory (MB)')
+ax2.tick_params(axis='y', labelcolor=color)
+
+# Title and show plot
+plt.title('CPU and Memory Usage Over Time')
+fig.tight_layout()  # adjust subplot parameters to give specified padding
+plt.show()
