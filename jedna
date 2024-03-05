@@ -21,8 +21,8 @@ def count_running_apps(time_point, data):
 # Count the number of running applications for each time point
 running_apps_counts = [count_running_apps(time, data) for time in time_range]
 
-# Plotting the graph
-fig, ax = plt.subplots()
+# Plotting the graph with an adjusted size
+fig, ax = plt.subplots(figsize=(15, 7))  # Adjust figsize to make the graph larger
 ax.plot(time_range, running_apps_counts, label='Running Applications')
 ax.set_xlabel('Time')
 ax.set_ylabel('Number of Running Applications')
