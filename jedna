@@ -1,21 +1,88 @@
-SELECT DISTINCT s.ServerID, s.ServerName
-FROM Servers s
-JOIN ServerFlags sf ON s.ServerID = sf.ServerID
-JOIN Flags f ON sf.FlagID = f.FlagID
-WHERE f.FlagID IN (
-    SELECT af.FlagID
-    FROM ApplicationFlags af
-    WHERE af.ApplicationID = @ApplicationID
-);
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using YourApp.Models;
+using System.Collections.Generic;
+
+namespace YourApp.Pages
+{
+    public class FlagsModel : PageModel
+    {
+        public List<Flag> Flags { get; set; } = new List<Flag>();
+
+        [BindProperty]
+        public Flag NewFlag { get; set; }
+
+        public void OnGet()
+        {
+            // Load flags from your data source here
+            // This example uses a static list for demonstration
+        }
+
+        public IActionResult OnPostDelete(int id)
+        {
+            // Delete the flag with the given id from your data source
+            // Redirect to the same page to refresh the flags list
+            return RedirectToPage();
+        }
+
+        public IActionResult OnPostEdit(int id, string name)
+        {
+            // Find the flag by id and update its name
+            // Save changes to your data source
+            // Redirect to refresh the page
+            return RedirectToPage();
+        }
+
+        public IActionResult OnPostAdd()
+        {
+            // Add NewFlag to your data source
+            // Redirect to refresh the list
+            return RedirectToPage();
+        }
+    }
+}
 
 
-int applicationId = /* the application ID you're interested in */;
 
-    var serversForApplication = context.Servers
-        .Where(s => s.ServerFlags
-            .Any(sf => context.ApplicationFlags
-                .Where(af => af.ApplicationId == applicationId)
-                .Select(af => af.FlagId)
-                .Contains(sf.FlagId)))
-        .Select(s => new { s.ServerId, s.ServerName })
-        .ToList();
+
+
+
+
+
+@page
+@model YourApp.Pages.FlagsModel
+
+<h2>Flags</h2>
+
+<form method="post">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var flag in Model.Flags)
+            {
+                <tr>
+                    <td>@flag.ID</td>
+                    <td>
+                        <input type="text" asp-for="@flag.Name" />
+                    </td>
+                    <td>
+                        <button formaction="/Flags?handler=Edit&id=@flag.ID" type="submit">Edit</button>
+                        <button formaction="/Flags?handler=Delete&id=@flag.ID" type="submit">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</form>
+
+<h3>Add New Flag</h3>
+<form method="post" asp-page-handler="Add">
+    <input type="text" asp-for="NewFlag.Name" required />
+    <button type="submit">Add</button>
+</form>
