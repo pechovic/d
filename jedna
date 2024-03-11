@@ -7,3 +7,15 @@ WHERE f.FlagID IN (
     FROM ApplicationFlags af
     WHERE af.ApplicationID = @ApplicationID
 );
+
+
+int applicationId = /* the application ID you're interested in */;
+
+    var serversForApplication = context.Servers
+        .Where(s => s.ServerFlags
+            .Any(sf => context.ApplicationFlags
+                .Where(af => af.ApplicationId == applicationId)
+                .Select(af => af.FlagId)
+                .Contains(sf.FlagId)))
+        .Select(s => new { s.ServerId, s.ServerName })
+        .ToList();
