@@ -1,88 +1,36 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using YourApp.Models;
-using System.Collections.Generic;
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
 
-namespace YourApp.Pages
-{
-    public class FlagsModel : PageModel
-    {
-        public List<Flag> Flags { get; set; } = new List<Flag>();
+# Load the CSV file
+file_path = 'path_to_your_file.csv'  # Update this path to your CSV file location
+data = pd.read_csv(file_path)
 
-        [BindProperty]
-        public Flag NewFlag { get; set; }
+# Convert 'Started' and 'Stopped' columns to datetime objects
+data['Started'] = pd.to_datetime(data['Started'])
+data['Stopped'] = pd.to_datetime(data['Stopped'])
 
-        public void OnGet()
-        {
-            // Load flags from your data source here
-            // This example uses a static list for demonstration
-        }
+# Create a time range from the earliest 'Started' to the latest 'Stopped'
+# Generating time points at 1-minute intervals
+time_range = pd.date_range(start=data['Started'].min(), end=data['Stopped'].max(), freq='T')
 
-        public IActionResult OnPostDelete(int id)
-        {
-            // Delete the flag with the given id from your data source
-            // Redirect to the same page to refresh the flags list
-            return RedirectToPage();
-        }
+# Function to count running applications at each time point
+def count_running_apps(time_point, data):
+    return np.sum((data['Started'] <= time_point) & (data['Stopped'] >= time_point))
 
-        public IActionResult OnPostEdit(int id, string name)
-        {
-            // Find the flag by id and update its name
-            // Save changes to your data source
-            // Redirect to refresh the page
-            return RedirectToPage();
-        }
+# Count the number of running applications for each time point
+running_apps_counts = [count_running_apps(time, data) for time in time_range]
 
-        public IActionResult OnPostAdd()
-        {
-            // Add NewFlag to your data source
-            // Redirect to refresh the list
-            return RedirectToPage();
-        }
-    }
-}
+# Calculate the average number of running applications
+average_running_apps = np.mean(running_apps_counts)
 
-
-
-
-
-
-
-
-@page
-@model YourApp.Pages.FlagsModel
-
-<h2>Flags</h2>
-
-<form method="post">
-    <table class="table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var flag in Model.Flags)
-            {
-                <tr>
-                    <td>@flag.ID</td>
-                    <td>
-                        <input type="text" asp-for="@flag.Name" />
-                    </td>
-                    <td>
-                        <button formaction="/Flags?handler=Edit&id=@flag.ID" type="submit">Edit</button>
-                        <button formaction="/Flags?handler=Delete&id=@flag.ID" type="submit">Delete</button>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-</form>
-
-<h3>Add New Flag</h3>
-<form method="post" asp-page-handler="Add">
-    <input type="text" asp-for="NewFlag.Name" required />
-    <button type="submit">Add</button>
-</form>
+# Plotting the graph with an adjusted size and the average line
+fig, ax = plt.subplots(figsize=(15, 7))  # Adjust figsize to make the graph larger
+ax.plot(time_range, running_apps_counts, label='Running Applications')
+ax.axhline(y=average_running_apps, color='r', linestyle='--', label='Average Running Applications')
+ax.set_xlabel('Time')
+ax.set_ylabel('Number of Running Applications')
+plt.xticks(rotation=45)  # Rotate date labels for better readability
+plt.title('Number of Running Applications Over Time')
+plt.legend()
+plt.show()
