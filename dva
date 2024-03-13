@@ -1,0 +1,84 @@
+@page
+@model EditAgentModel
+
+<form method="post">
+    <input type="hidden" asp-for="Agent.ID" />
+    <div>
+        <label asp-for="Agent.Name"></label>
+        <input asp-for="Agent.Name" />
+    </div>
+    
+    <div>
+        <label>Available Flags</label>
+        <select asp-for="SelectedFlagId">
+            @foreach (var flag in Model.AvailableFlags)
+            {
+                <option value="@flag.ID">@flag.Name</option>
+            }
+        </select>
+        <button type="submit" asp-page-handler="AddFlag">Add Flag</button>
+    </div>
+
+    <div>
+        <ul>
+            @foreach (var flag in Model.Agent.Flags)
+            {
+                <li>
+                    @flag.Name
+                    <button type="submit" asp-page-handler="RemoveFlag" asp-route-flagId="@flag.ID">Remove</button>
+                </li>
+            }
+        </ul>
+    </div>
+    
+    <button type="submit" asp-page-handler="Save">Save Agent</button>
+</form>
+
+
+
+
+
+
+
+          public class EditAgentModel : PageModel
+{
+    public Agent Agent { get; set; }
+    public List<Flag> AvailableFlags { get; set; } = new List<Flag>();
+    [BindProperty]
+    public int SelectedFlagId { get; set; }
+
+    public void OnGet(int agentId)
+    {
+        // Load the Agent by ID from the database or repository
+        // Populate the Agent property
+        
+        // Load available flags
+        // Populate the AvailableFlags property, excluding the flags already assigned to the agent
+    }
+
+    public IActionResult OnPostAddFlag()
+    {
+        // Find the flag by SelectedFlagId
+        // Add the flag to the Agent's Flags
+        // Save changes if needed
+
+        return RedirectToPage();
+    }
+
+    public IActionResult OnPostRemoveFlag(int flagId)
+    {
+        // Find the flag in the Agent's Flags by flagId
+        // Remove the flag
+        // Save changes if needed
+
+        return RedirectToPage();
+    }
+
+    public IActionResult OnPostSave()
+    {
+        // Save changes to the Agent
+        // Redirect to the appropriate page, e.g., Agent list or detail page
+
+        return RedirectToPage("./Index");
+    }
+}
