@@ -1,36 +1,22 @@
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
+@page
+@model EditModel
 
-# Load the CSV file
-file_path = 'path_to_your_file.csv'  # Update this path to your CSV file location
-data = pd.read_csv(file_path)
-
-# Convert 'Started' and 'Stopped' columns to datetime objects
-data['Started'] = pd.to_datetime(data['Started'])
-data['Stopped'] = pd.to_datetime(data['Stopped'])
-
-# Create a time range from the earliest 'Started' to the latest 'Stopped'
-# Generating time points at 1-minute intervals
-time_range = pd.date_range(start=data['Started'].min(), end=data['Stopped'].max(), freq='T')
-
-# Function to count running applications at each time point
-def count_running_apps(time_point, data):
-    return np.sum((data['Started'] <= time_point) & (data['Stopped'] >= time_point))
-
-# Count the number of running applications for each time point
-running_apps_counts = [count_running_apps(time, data) for time in time_range]
-
-# Calculate the average number of running applications
-average_running_apps = np.mean(running_apps_counts)
-
-# Plotting the graph with an adjusted size and the average line
-fig, ax = plt.subplots(figsize=(15, 7))  # Adjust figsize to make the graph larger
-ax.plot(time_range, running_apps_counts, label='Running Applications')
-ax.axhline(y=average_running_apps, color='r', linestyle='--', label='Average Running Applications')
-ax.set_xlabel('Time')
-ax.set_ylabel('Number of Running Applications')
-plt.xticks(rotation=45)  # Rotate date labels for better readability
-plt.title('Number of Running Applications Over Time')
-plt.legend()
-plt.show()
+<form method="post">
+    <div>
+        <label asp-for="Car.ID"></label>
+        <input asp-for="Car.ID" readonly />
+        <span asp-validation-for="Car.ID" class="text-danger"></span>
+    </div>
+    <div>
+        <label asp-for="Car.Color"></label>
+        <input asp-for="Car.Color" />
+        <span asp-validation-for="Car.Color" class="text-danger"></span>
+    </div>
+    <div>
+        <label asp-for="Car.Type"></label>
+        <select asp-for="Car.Type" asp-items="@Model.CarTypeSelectList">
+            <option value="">Please select a type</option>
+        </select>
+    </div>
+    <button type="submit">Save</button>
+</form>
