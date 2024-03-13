@@ -20,3 +20,50 @@
     </div>
     <button type="submit">Save</button>
 </form>
+
+
+
+
+public class EditModel : PageModel
+{
+    [BindProperty]
+    public Car Car { get; set; }
+
+    // Prepare SelectList for CarType enum
+    public SelectList CarTypeSelectList { get; set; }
+
+    public void OnGet(int id)
+    {
+        // Initialize your Car here for the example
+        Car = new Car { ID = id, Color = "Red", Type = CarType.Personal };
+
+        // Convert CarType enum values to SelectListItems
+        CarTypeSelectList = new SelectList(Enum.GetValues(typeof(CarType))
+                                           .Cast<CarType>()
+                                           .Select(type => new SelectListItem 
+                                            {
+                                                Text = type.ToString(),
+                                                Value = ((int)type).ToString()
+                                            }), "Value", "Text", Car.Type);
+    }
+
+    public IActionResult OnPost()
+    {
+        if (!ModelState.IsValid)
+        {
+            // If we post back, ensure the SelectList is repopulated
+            CarTypeSelectList = new SelectList(Enum.GetValues(typeof(CarType))
+                                           .Cast<CarType>()
+                                           .Select(type => new SelectListItem 
+                                            {
+                                                Text = type.ToString(),
+                                                Value = ((int)type).ToString()
+                                            }), "Value", "Text", Car.Type);
+            return Page();
+        }
+
+        // Save changes here
+
+        return RedirectToPage("./Index"); // Or wherever you'd like to redirect
+    }
+}
