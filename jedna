@@ -1,40 +1,32 @@
-using NUnit.Framework;
-using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Linq;
-
-[TestFixture]
-public class AgentServiceTests
-{
-    [Test]
-    public void GetAgentsForApplication_ReturnsCorrectAgents()
-    {
-        // Arrange
-        var options = new DbContextOptionsBuilder<MyDbContext>()
-            .UseInMemoryDatabase(databaseName: "TestDb")
-            .Options;
-
-        // Seed data
-        using (var context = new MyDbContext(options))
-        {
-            context.Agents.Add(new Agent { AgentId = 1, AgentName = "Agent1" });
-            context.Flags.Add(new Flag { FlagId = 1, FlagName = "Flag1" });
-            context.AgentFlags.Add(new AgentFlag { AgentId = 1, FlagId = 1 });
-            context.Applications.Add(new Application { ApplicationId = 1, ApplicationName = "App1" });
-            context.ApplicationFlags.Add(new ApplicationFlag { ApplicationId = 1, FlagId = 1 });
-            context.SaveChanges();
-        }
-
-        // Act
-        List<Agent> agents;
-        using (var context = new MyDbContext(options))
-        {
-            var service = new AgentService(context);
-            agents = service.GetAgentsForApplication(1);
-        }
-
-        // Assert
-        Assert.AreEqual(1, agents.Count);
-        Assert.AreEqual("Agent1", agents.First().AgentName);
-    }
+.warning-box {
+    padding: 20px;
+    background-color: #f9f9f9; /* Light grey background */
+    border-left: 6px solid #ffcc00; /* Bright yellow left border */
+    margin-bottom: 15px; /* Add some margin below the box */
+    color: #333333; /* Darker text color for better readability */
+    border-radius: 5px; /* Slightly rounded corners for a softer look */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Subtle shadow for depth */
 }
+
+/* Optional: Add a close button inside the warning box for dismissible warnings */
+.closebtn {
+    margin-left: 15px;
+    color: #666666;
+    font-weight: bold;
+    float: right;
+    font-size: 22px;
+    line-height: 20px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.closebtn:hover {
+    color: #000;
+}
+
+
+
+<div class="warning-box">
+  <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+  <strong>Warning!</strong> This is a warning message about something very important.
+</div>
