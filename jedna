@@ -1,69 +1,40 @@
-@page
-@model EditModel
+using NUnit.Framework;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
 
-<form method="post">
-    <div>
-        <label asp-for="Car.ID"></label>
-        <input asp-for="Car.ID" readonly />
-        <span asp-validation-for="Car.ID" class="text-danger"></span>
-    </div>
-    <div>
-        <label asp-for="Car.Color"></label>
-        <input asp-for="Car.Color" />
-        <span asp-validation-for="Car.Color" class="text-danger"></span>
-    </div>
-    <div>
-        <label asp-for="Car.Type"></label>
-        <select asp-for="Car.Type" asp-items="@Model.CarTypeSelectList">
-            <option value="">Please select a type</option>
-        </select>
-    </div>
-    <button type="submit">Save</button>
-</form>
-
-
-
-
-public class EditModel : PageModel
+[TestFixture]
+public class AgentServiceTests
 {
-    [BindProperty]
-    public Car Car { get; set; }
-
-    // Prepare SelectList for CarType enum
-    public SelectList CarTypeSelectList { get; set; }
-
-    public void OnGet(int id)
+    [Test]
+    public void GetAgentsForApplication_ReturnsCorrectAgents()
     {
-        // Initialize your Car here for the example
-        Car = new Car { ID = id, Color = "Red", Type = CarType.Personal };
+        // Arrange
+        var options = new DbContextOptionsBuilder<MyDbContext>()
+            .UseInMemoryDatabase(databaseName: "TestDb")
+            .Options;
 
-        // Convert CarType enum values to SelectListItems
-        CarTypeSelectList = new SelectList(Enum.GetValues(typeof(CarType))
-                                           .Cast<CarType>()
-                                           .Select(type => new SelectListItem 
-                                            {
-                                                Text = type.ToString(),
-                                                Value = ((int)type).ToString()
-                                            }), "Value", "Text", Car.Type);
-    }
-
-    public IActionResult OnPost()
-    {
-        if (!ModelState.IsValid)
+        // Seed data
+        using (var context = new MyDbContext(options))
         {
-            // If we post back, ensure the SelectList is repopulated
-            CarTypeSelectList = new SelectList(Enum.GetValues(typeof(CarType))
-                                           .Cast<CarType>()
-                                           .Select(type => new SelectListItem 
-                                            {
-                                                Text = type.ToString(),
-                                                Value = ((int)type).ToString()
-                                            }), "Value", "Text", Car.Type);
-            return Page();
+            context.Agents.Add(new Agent { AgentId = 1, AgentName = "Agent1" });
+            context.Flags.Add(new Flag { FlagId = 1, FlagName = "Flag1" });
+            context.AgentFlags.Add(new AgentFlag { AgentId = 1, FlagId = 1 });
+            context.Applications.Add(new Application { ApplicationId = 1, ApplicationName = "App1" });
+            context.ApplicationFlags.Add(new ApplicationFlag { ApplicationId = 1, FlagId = 1 });
+            context.SaveChanges();
         }
 
-        // Save changes here
+        // Act
+        List<Agent> agents;
+        using (var context = new MyDbContext(options))
+        {
+            var service = new AgentService(context);
+            agents = service.GetAgentsForApplication(1);
+        }
 
-        return RedirectToPage("./Index"); // Or wherever you'd like to redirect
+        // Assert
+        Assert.AreEqual(1, agents.Count);
+        Assert.AreEqual("Agent1", agents.First().AgentName);
     }
 }
