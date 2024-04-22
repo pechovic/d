@@ -1,43 +1,100 @@
+Interview Question: Balanced Brackets
+
+Problem Statement:
+Write a function that takes a string containing only three types of characters: ‘(’, ‘)’, ‘[’, ‘]’, ‘{’, and ‘}’. The function should determine whether the brackets in the string are balanced. Every opening bracket (i.e., ‘(’, ‘[’, or ‘{’) must have a corresponding closing bracket of the same type (i.e., ‘)’, ‘]’, or ‘}’), and the pairs must be correctly nested.
+
+
+Examples:
+
+	1.	Input: “([])”
+Output: True
+Explanation: All the brackets are paired and nested correctly.
+	2.	Input: “([)]”
+Output: False
+Explanation: The brackets are not nested correctly.
+	3.	Input: “((()))”
+Output: True
+Explanation: All brackets are nested correctly.
+	4.	Input: “{[}]”
+Output: False
+Explanation: The brackets are not paired correctly; ‘]’ should not be inside ‘{}’.
+
+Coding Requirements:
+
+	•	You may use a stack to keep track of the brackets.
+	•	The function should return true if the string is balanced, otherwise false.
+
 using System;
-using System.Threading;
+using System.Collections.Generic;
 
-class Program
+public class BracketMatcher
 {
-    static void Main(string[] args)
+    public static bool AreBracketsBalanced(string expression)
     {
-        while (true) // Infinite loop
+        // Stack to keep track of opening brackets
+        Stack<char> stack = new Stack<char>();
+
+        // Loop through each character in the expression
+        foreach (char ch in expression)
         {
-            // Get the current time
-            DateTime now = DateTime.Now;
-
-            // Check if it's the first day of the month and the time is 3:00 AM
-            if (now.Day == 1 && now.Hour == 3 && now.Minute == 0)
+            // If the character is an opening bracket, push it onto the stack
+            if (ch == '(' || ch == '{' || ch == '[')
             {
-                // Code to execute once a month goes here
-                Console.WriteLine("Executing task...");
-
-                // Wait for 60 seconds (1 minute) after execution to prevent the task from running multiple times in the same minute
-                Thread.Sleep(60000);
+                stack.Push(ch);
             }
-            else
+            else if (ch == ')' || ch == '}' || ch == ']')
             {
-                // Calculate the time remaining until 3:00 AM on the first day of the next month
-                DateTime nextMonth = new DateTime(now.Year, now.Month, 1).AddMonths(1);
-                DateTime nextExecutionTime = new DateTime(nextMonth.Year, nextMonth.Month, 1, 3, 0, 0);
-                TimeSpan timeUntilNextExecution = nextExecutionTime - now;
+                // If the stack is empty, it means no opening bracket is available for matching
+                if (stack.Count == 0)
+                    return false;
 
-                // If it's past 3:00 AM on the first day, adjust for the next month
-                if (timeUntilNextExecution.TotalMilliseconds < 0)
+                // Check if the popped bracket matches the current closing bracket
+                char top = stack.Pop();
+                if ((top == '(' && ch != ')') ||
+                    (top == '{' && ch != '}') ||
+                    (top == '[' && ch != ']'))
                 {
-                    nextMonth = nextMonth.AddMonths(1);
-                    nextExecutionTime = new DateTime(nextMonth.Year, nextMonth.Month, 1, 3, 0, 0);
-                    timeUntilNextExecution = nextExecutionTime - now;
+                    return false;
                 }
-
-                // Sleep until the next execution time (convert to milliseconds)
-                Console.WriteLine($"Waiting for next execution: {nextExecutionTime}");
-                Thread.Sleep((int)timeUntilNextExecution.TotalMilliseconds);
             }
+        }
+
+        // If stack is empty, all opening brackets had matching closing brackets
+        return stack.Count == 0;
+    }
+
+    static void Main()
+    {
+        // Test cases
+        string[] expressions = { "([])[]({})", "([)]", "((()))", "{[}]" };
+
+        foreach (string expression in expressions)
+        {
+            bool result = AreBracketsBalanced(expression);
+            Console.WriteLine($"Expression: {expression} - Balanced: {result}");
         }
     }
 }
+
+
+Interview Question: Preorder Traversal of Binary Tree
+
+Problem Statement:
+Write a function that performs a preorder traversal of a binary tree and returns a list of values in the order they were visited. In preorder traversal, the nodes are visited in the order: Root, Left, Right.
+
+Background:
+Preorder traversal is a method of visiting all the nodes in a binary tree where each node is processed before either of its sub-trees. This is useful for creating a copy of the tree or for serializing the tree into a list or string format.
+
+Examples:
+
+	1.	Input:
+
+
+
+
+
+
+
+
+
+
