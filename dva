@@ -1,84 +1,16 @@
-@page
-@model EditAgentModel
-
-<form method="post">
-    <input type="hidden" asp-for="Agent.ID" />
-    <div>
-        <label asp-for="Agent.Name"></label>
-        <input asp-for="Agent.Name" />
-    </div>
-    
-    <div>
-        <label>Available Flags</label>
-        <select asp-for="SelectedFlagId">
-            @foreach (var flag in Model.AvailableFlags)
-            {
-                <option value="@flag.ID">@flag.Name</option>
-            }
-        </select>
-        <button type="submit" asp-page-handler="AddFlag">Add Flag</button>
-    </div>
-
-    <div>
-        <ul>
-            @foreach (var flag in Model.Agent.Flags)
-            {
-                <li>
-                    @flag.Name
-                    <button type="submit" asp-page-handler="RemoveFlag" asp-route-flagId="@flag.ID">Remove</button>
-                </li>
-            }
-        </ul>
-    </div>
-    
-    <button type="submit" asp-page-handler="Save">Save Agent</button>
-</form>
-
-
-
-
-
-
-
-          public class EditAgentModel : PageModel
-{
-    public Agent Agent { get; set; }
-    public List<Flag> AvailableFlags { get; set; } = new List<Flag>();
-    [BindProperty]
-    public int SelectedFlagId { get; set; }
-
-    public void OnGet(int agentId)
-    {
-        // Load the Agent by ID from the database or repository
-        // Populate the Agent property
-        
-        // Load available flags
-        // Populate the AvailableFlags property, excluding the flags already assigned to the agent
-    }
-
-    public IActionResult OnPostAddFlag()
-    {
-        // Find the flag by SelectedFlagId
-        // Add the flag to the Agent's Flags
-        // Save changes if needed
-
-        return RedirectToPage();
-    }
-
-    public IActionResult OnPostRemoveFlag(int flagId)
-    {
-        // Find the flag in the Agent's Flags by flagId
-        // Remove the flag
-        // Save changes if needed
-
-        return RedirectToPage();
-    }
-
-    public IActionResult OnPostSave()
-    {
-        // Save changes to the Agent
-        // Redirect to the appropriate page, e.g., Agent list or detail page
-
-        return RedirectToPage("./Index");
-    }
+.code-style {
+    font-family: 'Courier New', Courier, monospace; /* Sets the font to a monospace type */
+    background-color: #f4f4f4; /* Light grey background for contrast */
+    color: #333; /* Dark grey color for the text */
+    padding: 10px; /* Adds space inside the div */
+    border-radius: 5px; /* Optional: Rounds the corners of the div */
+    border: 1px solid #ccc; /* Optional: Adds a light grey border */
+    white-space: pre-wrap; /* Ensures that whitespace is preserved and lines wrap */
+    word-wrap: break-word; /* Allows long words to break and wrap to the next line */
+    overflow-x: auto; /* Adds a horizontal scrollbar if content overflows */
 }
+
+<div class="code-style">
+    // Your code here
+    console.log('Hello, world!');
+</div>
