@@ -1,100 +1,22 @@
-Interview Question: Balanced Brackets
+param (
+    [string]$originalContainer,
+    [string]$newContainer
+)
 
-Problem Statement:
-Write a function that takes a string containing only three types of characters: ‘(’, ‘)’, ‘[’, ‘]’, ‘{’, and ‘}’. The function should determine whether the brackets in the string are balanced. Every opening bracket (i.e., ‘(’, ‘[’, or ‘{’) must have a corresponding closing bracket of the same type (i.e., ‘)’, ‘]’, or ‘}’), and the pairs must be correctly nested.
+# Get environment variables
+$envVars = (docker inspect --format='{{range $index, $value := .Config.Env}} -e {{$value}}{{end}}' $originalContainer) -join " "
 
+# Get volume mounts
+$volumes = (docker inspect --format='{{range $index, $value := .HostConfig.Binds}} -v {{$value}}{{end}}' $originalContainer) -join " "
 
-Examples:
+# Get the image name
+$image = docker inspect --format='{{.Config.Image}}' $originalContainer
 
-	1.	Input: “([])”
-Output: True
-Explanation: All the brackets are paired and nested correctly.
-	2.	Input: “([)]”
-Output: False
-Explanation: The brackets are not nested correctly.
-	3.	Input: “((()))”
-Output: True
-Explanation: All brackets are nested correctly.
-	4.	Input: “{[}]”
-Output: False
-Explanation: The brackets are not paired correctly; ‘]’ should not be inside ‘{}’.
-
-Coding Requirements:
-
-	•	You may use a stack to keep track of the brackets.
-	•	The function should return true if the string is balanced, otherwise false.
-
-using System;
-using System.Collections.Generic;
-
-public class BracketMatcher
-{
-    public static bool AreBracketsBalanced(string expression)
-    {
-        // Stack to keep track of opening brackets
-        Stack<char> stack = new Stack<char>();
-
-        // Loop through each character in the expression
-        foreach (char ch in expression)
-        {
-            // If the character is an opening bracket, push it onto the stack
-            if (ch == '(' || ch == '{' || ch == '[')
-            {
-                stack.Push(ch);
-            }
-            else if (ch == ')' || ch == '}' || ch == ']')
-            {
-                // If the stack is empty, it means no opening bracket is available for matching
-                if (stack.Count == 0)
-                    return false;
-
-                // Check if the popped bracket matches the current closing bracket
-                char top = stack.Pop();
-                if ((top == '(' && ch != ')') ||
-                    (top == '{' && ch != '}') ||
-                    (top == '[' && ch != ']'))
-                {
-                    return false;
-                }
-            }
-        }
-
-        // If stack is empty, all opening brackets had matching closing brackets
-        return stack.Count == 0;
-    }
-
-    static void Main()
-    {
-        // Test cases
-        string[] expressions = { "([])[]({})", "([)]", "((()))", "{[}]" };
-
-        foreach (string expression in expressions)
-        {
-            bool result = AreBracketsBalanced(expression);
-            Console.WriteLine($"Expression: {expression} - Balanced: {result}");
-        }
-    }
-}
-
-
-Interview Question: Preorder Traversal of Binary Tree
-
-Problem Statement:
-Write a function that performs a preorder traversal of a binary tree and returns a list of values in the order they were visited. In preorder traversal, the nodes are visited in the order: Root, Left, Right.
-
-Background:
-Preorder traversal is a method of visiting all the nodes in a binary tree where each node is processed before either of its sub-trees. This is useful for creating a copy of the tree or for serializing the tree into a list or string format.
-
-Examples:
-
-	1.	Input:
+# Run the new container interactively
+docker run -it $envVars $volumes --name $newContainer $image /bin/bash
 
 
 
+######### Usage:
 
-
-
-
-
-
-
+.\run_interactive.ps1 -originalContainer "my_old_container" -newContainer "my_new_interactive_container"
