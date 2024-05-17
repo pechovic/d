@@ -4,10 +4,12 @@ param (
 )
 
 # Get environment variables
-$envVars = (docker inspect --format='{{range $index, $value := .Config.Env}} -e {{$value}}{{end}}' $originalContainer) -join " "
+$envVarsArray = docker inspect --format='{{range $index, $value := .Config.Env}} -e "`"$value`"" {{end}}' $originalContainer
+$envVars = $envVarsArray -join " "
 
 # Get volume mounts
-$volumes = (docker inspect --format='{{range $index, $value := .HostConfig.Binds}} -v {{$value}}{{end}}' $originalContainer) -join " "
+$volumesArray = docker inspect --format='{{range $index, $value := .HostConfig.Binds}} -v "`"$value`"" {{end}}' $originalContainer
+$volumes = $volumesArray -join " "
 
 # Get the image name
 $image = docker inspect --format='{{.Config.Image}}' $originalContainer
