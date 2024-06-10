@@ -80,3 +80,60 @@ if __name__ == "__main__":
     api_client.post_data(endpoint, payload)
 
 
+
+
+
+
+
+
+import requests
+
+class ApiClient:
+    def __init__(self, base_url):
+        self.base_url = base_url
+
+    def post_data_text(self, endpoint, payload):
+        url = f"{self.base_url}{endpoint}"
+        
+        # Perform the POST request without certificate validation
+        response = requests.post(url, json=payload, verify=False)
+        
+        # Check if the request was successful
+        if response.status_code == 200:
+            # Access the response text
+            data = response.text
+            print("Data sent successfully. Response received:")
+            print(data)
+        else:
+            print(f"Failed to send data. Status code: {response.status_code}")
+
+    def post_data_json(self, endpoint, payload):
+        url = f"{self.base_url}{endpoint}"
+        
+        # Perform the POST request without certificate validation
+        response = requests.post(url, json=payload, verify=False)
+        
+        # Check if the request was successful
+        if response.status_code == 200:
+            try:
+                # Parse the JSON response
+                data = response.json()
+                print("Data sent successfully. JSON response received:")
+                print(data)
+            except ValueError:
+                print("Response content is not valid JSON")
+        else:
+            print(f"Failed to send data. Status code: {response.status_code}")
+
+# Example usage:
+if __name__ == "__main__":
+    base_url = 'https://api.example.com/'
+    endpoint = 'data'
+    payload = {
+        'key1': 'value1',
+        'key2': 'value2'
+    }
+
+    api_client = ApiClient(base_url)
+    api_client.post_data_text(endpoint, payload)  # For handling text response
+    api_client.post_data_json(endpoint, payload)  # For handling JSON response
