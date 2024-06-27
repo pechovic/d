@@ -25,3 +25,39 @@ my_instance.initialize()
 # Access the properties
 print(f"some_var_exists: {my_instance.some_var_exists}")
 print(f"some_var_value: {my_instance.some_var_value}")
+
+
+
+import pandas as pd
+
+# Sample data
+data = {
+    'FAIId': [1, 2, 3, 4],
+    'FAId': [10, 20, 30, 40],
+    'Name': ['A', 'B', 'C', 'D'],
+    'Started': ['2024-06-10 08:00:00', '2024-06-10 09:00:00', '2024-06-10 10:00:00', '2024-06-10 11:00:00'],
+    'Stopped': ['2024-06-10 12:00:00', '2024-06-10 13:00:00', '2024-06-10 14:00:00', '2024-06-10 15:00:00'],
+    'Login': ['user1', 'user2', 'user1', 'user2']
+}
+
+df = pd.DataFrame(data)
+
+# Convert Started and Stopped columns to datetime
+df['Started'] = pd.to_datetime(df['Started'])
+df['Stopped'] = pd.to_datetime(df['Stopped'])
+
+# Define the date interval
+start_date = pd.to_datetime('2024-06-10 00:00:00')
+end_date = pd.to_datetime('2024-06-10 23:59:59')
+
+# Filter the DataFrame based on the date interval
+filtered_df = df[(df['Started'] >= start_date) & (df['Stopped'] <= end_date)]
+
+# Calculate the time difference in hours
+filtered_df['TimeTotal'] = (filtered_df['Stopped'] - filtered_df['Started']).dt.total_seconds() / 3600
+
+# Group by Login and sum the TimeTotal
+aggregated_data = filtered_df.groupby('Login')['TimeTotal'].sum().reset_index()
+
+# Display the aggregated data
+print(aggregated_data)
