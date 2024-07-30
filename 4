@@ -1,1 +1,4 @@
 for /d /r "C:\YourRootDirectory" %i in (*) do @echo %i | findstr /i "YourString" && echo %i
+
+@echo off & set "found=0" & for /d /r "C:\YourRootDirectory" %i in (*) do @echo %i | findstr /i "YourString" >nul && (set "found=1" & goto :break) & :break & if %found%==1 (echo not ok) else (echo ok)
+
