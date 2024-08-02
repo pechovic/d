@@ -1,4 +1,48 @@
-for /d /r "C:\YourRootDirectory" %i in (*) do @echo %i | findstr /i "YourString" && echo %i
+# Define the script parameters
+param(
+    [string]$DockerImageName,
+    [string]$RootDirectory,
+    [string]$FolderName
+)
 
-@echo off & set "found=0" & for /d /r "C:\YourRootDirectory" %i in (*) do @echo %i | findstr /i "YourString" >nul && (set "found=1" & goto :break) & :break & if %found%==1 (echo not ok) else (echo ok)
+# Function to check if Docker is installed
+function Check-Docker {
+    try {
+        docker --version | Out-Null
+    } catch {
+        Write-Host "Docker is not installed or not running."
+        exit 1
+    }
+}
 
+# Function to search for the folder within the root directory
+function Search-FolderInDockerImage {
+    param (
+        [string]$DockerImageName,
+        [string]$RootDirectory,
+        [string]$FolderName
+    )
+
+    # Run the Docker container in a temporary container and search for the folder
+    $command = "docker run --rm $DockerImageName find '$RootDirectory' -type d -name '$FolderName'"
+
+    try {
+        $result = Invoke-Expression $command
+
+        if ($result) {
+            Write-Host "Folder '$FolderName' found at the following locations:"
+            Write-Host $result
+        } else {
+            Write-Host "Folder '$FolderName' not found in the directory '$RootDirectory' inside the Docker image."
+        }
+    } catch {
+        Write-Host "An error occurred while searching for the folder."
+        exit 1
+    }
+}
+
+# Check if Docker is installed
+Check-Docker
+
+# Search for the folder in the Docker image
+Search-FolderInDockerImage -DockerImageName $DockerImageName -RootDirectory $RootDirectory -FolderName $FolderName
