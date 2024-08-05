@@ -1,90 +1,22 @@
-Certainly! Here's a simpler binary tree-related problem that focuses on a basic tree traversal technique, specifically **preorder traversal**. This problem is excellent for gauging a candidate's understanding of recursive methods and tree traversal concepts.
-
-### Interview Question: Preorder Traversal of Binary Tree
-
-**Problem Statement:**
-Write a function that performs a preorder traversal of a binary tree and returns a list of values in the order they were visited. In preorder traversal, the nodes are visited in the order: Root, Left, Right.
-
-**Background:**
-Preorder traversal is a method of visiting all the nodes in a binary tree where each node is processed before either of its sub-trees. This is useful for creating a copy of the tree or for serializing the tree into a list or string format.
-
-**Examples:**
-
-1. **Input:**
-```
-     1
-      \
-       2
-      /
-     3
-```
-   **Output:** `[1, 2, 3]`
-   **Explanation:** The root node (1) is visited first, then the right subtree of 1, which begins with 2, followed by the left child of 2, which is 3.
-
-2. **Input:**
-```
-     1
-    / \
-   2   3
-  / 
- 4  
-```
-   **Output:** `[1, 2, 4, 3]`
-   **Explanation:** The traversal visits the nodes in the order of Root (1), then left to 2, then left to 4, and finally right to 3.
-
-**Coding Requirements:**
-- Define the class `TreeNode` to use for the binary tree nodes.
-- Implement the function `PreorderTraversal(TreeNode root)` which will return a list of node values following the preorder traversal logic.
-
-Here’s how you can structure the C# function:
-
-```csharp
-using System;
-using System.Collections.Generic;
-
-public class TreeNode
-{
-    public int val;
-    public TreeNode left;
-    public TreeNode right;
-
-    public TreeNode(int x)
-    {
-        val = x;
+function Find-FolderByName {
+    param (
+        [Parameter(Mandatory=$true)]
+        [string]$RootFolder,
+        
+        [Parameter(Mandatory=$true)]
+        [string]$StringA
+    )
+    
+    # Get the list of all directories under the RootFolder that contain StringA in the name
+    $folders = Get-ChildItem -Path $RootFolder -Recurse -Directory | Where-Object { $_.Name -like "*$StringA*" }
+    
+    # If folders are found, return the paths
+    if ($folders.Count -gt 0) {
+        $folders.FullName
+    } else {
+        Write-Output "No folders found containing '$StringA' in the name under '$RootFolder'."
     }
 }
 
-public class BinaryTree
-{
-    public List<int> PreorderTraversal(TreeNode root)
-    {
-        List<int> result = new List<int>();
-        PreorderHelper(root, result);
-        return result;
-    }
-
-    private void PreorderHelper(TreeNode node, List<int> result)
-    {
-        if (node == null)
-            return;
-
-        result.Add(node.val); // Visit the root
-        PreorderHelper(node.left, result); // Traverse left subtree
-        PreorderHelper(node.right, result); // Traverse right subtree
-    }
-
-    public static void Main()
-    {
-        // Example usage
-        TreeNode root = new TreeNode(1);
-        root.right = new TreeNode(2);
-        root.right.left = new TreeNode(3);
-
-        BinaryTree tree = new BinaryTree();
-        List<int> traversalResult = tree.PreorderTraversal(root);
-        Console.WriteLine("Preorder traversal: " + String.Join(", ", traversalResult));
-    }
-}
-```
-
-This C# implementation defines a `TreeNode` class for binary tree nodes and a `BinaryTree` class that includes a method for performing a preorder traversal. It uses a helper method to apply recursion for traversing the tree. The `Main` method constructs a small tree and prints the result of the traversal, demonstrating how the function works. This example covers fundamental concepts and provides a clear understanding of binary tree operations.
+# Example usage:
+# Find-FolderByName -RootFolder "C:\MyRootFolder" -StringA "MyString"
