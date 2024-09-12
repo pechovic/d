@@ -68,3 +68,37 @@ docker run -it $envVars $volumes --name $newContainer $image /bin/bash
     <h1>Platform</h1>
 </body>
 </html>
+
+
+import pandas as pd
+import matplotlib.pyplot as plt
+from datetime import timedelta
+
+# Read CSV file into a DataFrame
+df = pd.read_csv('your_file.csv', parse_dates=['Started', 'Stopped'])
+
+# Filter for rows where Id == 21
+df_filtered = df[df['Id'] == 21]
+
+# Create a time range from the earliest start time to the latest stop time
+time_range = pd.date_range(start=df_filtered['Started'].min(), 
+                           end=df_filtered['Stopped'].max(), freq='T')  # 'T' for minute frequency
+
+# Create a DataFrame to store the number of active instances at each time step
+active_instances = pd.DataFrame(index=time_range, columns=['ActiveInstances'])
+active_instances['ActiveInstances'] = 0
+
+# Iterate over the filtered DataFrame and mark active times
+for _, row in df_filtered.iterrows():
+    active_instances.loc[row['Started']:row['Stopped'], 'ActiveInstances'] += 1
+
+# Plot the data
+plt.figure(figsize=(10, 6))
+plt.plot(active_instances.index, active_instances['ActiveInstances'], label='Active Instances')
+plt.xlabel('Time')
+plt.ylabel('Number of Active Instances')
+plt.title('Number of Active Instances Over Time (Id = 21)')
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
+
