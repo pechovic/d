@@ -1,104 +1,78 @@
-param (
-    [string]$originalContainer,
-    [string]$newContainer
-)
+Running a Docker container as part of a service that is running under the `Local System` account on Windows presents a unique challenge, as the `Local System` account doesn't have direct access to network drives like a normal user account would. Here's how you can make the mounted network drive available for Docker containers started under the `Local System` service:
 
-# Get environment variables
-$envVarsArray = docker inspect --format='{{range $index, $value := .Config.Env}} -e "`"$value`"" {{end}}' $originalContainer
-$envVars = $envVarsArray -join " "
+### Problem Breakdown:
+1. **Local System Account and Network Drives:**
+   The `Local System` account has limited access to network resources. Even if a network drive is mounted by a regular user, services running under the `Local System` account can't access those network shares directly. Therefore, we need to either run the Docker service as a different user or use alternative methods to make the network drive accessible.
 
-# Get volume mounts
-$volumesArray = docker inspect --format='{{range $index, $value := .HostConfig.Binds}} -v "`"$value`"" {{end}}' $originalContainer
-$volumes = $volumesArray -join " "
+2. **Docker and Drive Mounts:**
+   Docker containers need access to the mapped network drives through bind mounts. For this to work, the drive must be accessible to the process starting the Docker container, in this case, a service running under `Local System`.
 
-# Get the image name
-$image = docker inspect --format='{{.Config.Image}}' $originalContainer
+### Solution: Two Potential Approaches
 
-# Run the new container interactively
-docker run -it $envVars $volumes --name $newContainer $image /bin/bash
+#### Approach 1: Use UNC Paths Instead of Mapped Drives
+Instead of mapping a network drive (like `Z:`), you can use a UNC path (`\\server\share`) directly in your Docker command. This avoids the issues with `Local System` not being able to access mapped drives.
 
+**Steps:**
 
+1. Ensure the Docker service itself has access to the UNC path. You can achieve this by making sure the `Local System` account or the Docker service has network access to the shared resource.
 
-######### Usage:
+2. Use UNC paths directly in the `docker run` command when specifying the volume.
 
-.\run_interactive.ps1 -originalContainer "my_old_container" -newContainer "my_new_interactive_container"
+   Example Docker command using UNC paths:
+   ```bash
+   docker run -v "\\\\remote-server\\shared-folder:/mnt/shared" -it your-image-name
+   ```
 
+   **Important Note:** When using UNC paths, you need to escape backslashes (`\\` becomes `\\\\` in Docker commands).
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Styled Heading</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap" rel="stylesheet">
-    <style>
-        h1 {
-            font-family: 'Poppins', sans-serif;
-            font-size: 3.5em;
-            font-weight: 700;
-            color: #2d3436;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            background: linear-gradient(135deg, #74b9ff, #a29bfe);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-align: center;
-            position: relative;
-            margin: 20px 0;
-        }
+   In this example:
+   - `\\remote-server\shared-folder`: This is the UNC path to the shared folder.
+   - `/mnt/shared`: This is the directory inside the container where the shared folder will be mounted.
 
-        h1::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background: #74b9ff;
-            z-index: -1;
-        }
+#### Approach 2: Run the Docker Service or Your Service as a User Account with Network Access
+If using UNC paths isn't an option or if you need a mapped drive to work, another approach is to run either your service or the Docker service under a user account that has access to the network drive.
 
-        h1:hover {
-            letter-spacing: 4px;
-            transition: letter-spacing 0.3s ease-in-out;
-        }
-    </style>
-</head>
-<body>
-    <h1>Platform</h1>
-</body>
-</html>
+**Steps:**
 
+1. **Create a Service Account:**
+   - Create a new Windows user account (let's call it `docker-service-user`) with sufficient permissions to access the network share.
 
-import pandas as pd
-import matplotlib.pyplot as plt
-from datetime import timedelta
+2. **Grant Access to the Network Drive:**
+   - Make sure the `docker-service-user` has permission to access the network share.
+   - You can test this by logging in as the `docker-service-user` and attempting to manually access the network share in Windows Explorer.
 
-# Read CSV file into a DataFrame
-df = pd.read_csv('your_file.csv', parse_dates=['Started', 'Stopped'])
+3. **Configure the Docker Service to Run Under This User:**
+   - Open **Services** (`services.msc`).
+   - Locate the **Docker Desktop Service** or **Docker Engine** service.
+   - Right-click and go to **Properties**.
+   - In the **Log On** tab, select **This account** and enter the `docker-service-user` credentials.
+   - Restart the Docker service.
 
-# Filter for rows where Id == 21
-df_filtered = df[df['Id'] == 21]
+4. **Map the Network Drive Under the Service Account:**
+   - Log in as the `docker-service-user` (or use a command prompt running as this user) and map the network drive. For example:
+     ```cmd
+     net use Z: \\remote-server\shared-folder /user:your-username your-password
+     ```
 
-# Create a time range from the earliest start time to the latest stop time
-time_range = pd.date_range(start=df_filtered['Started'].min(), 
-                           end=df_filtered['Stopped'].max(), freq='T')  # 'T' for minute frequency
+5. **Run Your Service Using the Same User Account (Optional):**
+   If your service also runs Docker commands and it’s necessary for this service to directly access the network share, configure the service to run under the same `docker-service-user` account as well. You can do this similarly in the **Log On** tab of the service's properties.
 
-# Create a DataFrame to store the number of active instances at each time step
-active_instances = pd.DataFrame(index=time_range, columns=['ActiveInstances'])
-active_instances['ActiveInstances'] = 0
+6. **Run Docker Containers with Mapped Drives:**
+   Once the drive is mapped for the user account under which Docker is running, you can use the mapped drive letter in the `docker run` command.
 
-# Iterate over the filtered DataFrame and mark active times
-for _, row in df_filtered.iterrows():
-    active_instances.loc[row['Started']:row['Stopped'], 'ActiveInstances'] += 1
+   Example:
+   ```bash
+   docker run -v Z:/path/to/folder:/mnt/shared -it your-image-name
+   ```
 
-# Plot the data
-plt.figure(figsize=(10, 6))
-plt.plot(active_instances.index, active_instances['ActiveInstances'], label='Active Instances')
-plt.xlabel('Time')
-plt.ylabel('Number of Active Instances')
-plt.title('Number of Active Instances Over Time (Id = 21)')
-plt.xticks(rotation=45)
-plt.tight_layout()
-plt.show()
+### Additional Notes:
+- **Accessing Network Drives with Docker Desktop for Windows:**
+   Docker for Windows doesn’t always automatically share network drives with containers, so if you encounter issues, ensure the network drive is shared with Docker:
+   - Open Docker Desktop.
+   - Go to **Settings** > **Resources** > **File Sharing**.
+   - Add the mapped drive (e.g., `Z:`) to the list of shared drives.
+   - Restart Docker Desktop to apply the changes.
 
+- **Permissions:** Always make sure that the user running Docker (or your service) has the appropriate permissions to access the shared folder, either through the mapped drive or the UNC path.
+
+By using either of these approaches, you should be able to make the shared network drive accessible to Docker containers that are started by a service running under the `Local System` account or another user with the necessary permissions.
