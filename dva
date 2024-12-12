@@ -14,3 +14,136 @@
     // Your code here
     console.log('Hello, world!');
 </div>
+
+
+
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Threading;
+using Microsoft.AspNetCore.Mvc;
+
+namespace BackgroundWorkerExample 
+{
+    public class NodeRequest
+    {
+        public int Cpu { get; set; }
+        public int Memory { get; set; }
+    }
+
+    public class NodeSpawner
+    {
+        private static readonly ConcurrentQueue<NodeRequest> NodeQueue = new ConcurrentQueue<NodeRequest>();
+
+        private readonly BackgroundWorker _backgroundWorker;
+
+        public NodeSpawner()
+        {
+            // Initialize the background worker
+            _backgroundWorker = new BackgroundWorker
+            {
+                WorkerSupportsCancellation = true
+            };
+            _backgroundWorker.DoWork += BackgroundWorker_DoWork;
+            _backgroundWorker.RunWorkerAsync();
+        }
+
+        /// <summary>
+        /// API method to queue node spawn requests.
+        /// </summary>
+        /// <param name="nodeRequests">The list of node requests.</param>
+        public void EnqueueNodes(IEnumerable<NodeRequest> nodeRequests)
+        {
+            foreach (var request in nodeRequests)
+            {
+                NodeQueue.Enqueue(request);
+            }
+        }
+
+        /// <summary>
+        /// The background worker method that processes the node queue.
+        /// </summary>
+        private void BackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            while (!_backgroundWorker.CancellationPending)
+            {
+                if (NodeQueue.TryDequeue(out NodeRequest nodeRequest))
+                {
+                    Console.WriteLine($"Processing request to spawn a node with {nodeRequest.Cpu} CPUs and {nodeRequest.Memory} MB memory.");
+
+                    SpawnNode(nodeRequest);
+
+                    Console.WriteLine("Completed processing request.");
+                }
+
+                Thread.Sleep(100); // Prevent tight loop
+            }
+
+            Console.WriteLine("Background worker stopped.");
+        }
+
+        /// <summary>
+        /// Simulates the spawning of a node.
+        /// </summary>
+        /// <param name="request">The node request containing CPU and memory information.</param>
+        private void SpawnNode(NodeRequest request)
+        {
+            // Replace this with actual spawning logic
+            Console.WriteLine($"Spawning a node with {request.Cpu} CPUs and {request.Memory} MB memory...");
+        }
+
+        /// <summary>
+        /// Stops the background worker gracefully.
+        /// </summary>
+        public void Stop()
+        {
+            _backgroundWorker.CancelAsync();
+        }
+    }
+
+    [ApiController]
+    [Route("api/nodes")]
+    public class NodeController : ControllerBase
+    {
+        private readonly NodeSpawner _nodeSpawner;
+
+        public NodeController(NodeSpawner nodeSpawner)
+        {
+            _nodeSpawner = nodeSpawner;
+        }
+
+        [HttpPost("spawn")]
+        public IActionResult SpawnNodes([FromBody] List<NodeRequest> nodeRequests)
+        {
+            if (nodeRequests == null || nodeRequests.Count == 0)
+            {
+                return BadRequest("Node requests cannot be null or empty.");
+            }
+
+            _nodeSpawner.EnqueueNodes(nodeRequests);
+            return Ok("Node requests enqueued successfully.");
+        }
+    }
+
+    // Example usage
+    public static class Program
+    {
+        public static void Main()
+        {
+            var spawner = new NodeSpawner();
+
+            // Example of enqueuing nodes directly (not via API)
+            spawner.EnqueueNodes(new List<NodeRequest>
+            {
+                new NodeRequest { Cpu = 4, Memory = 8192 },
+                new NodeRequest { Cpu = 2, Memory = 4096 }
+            });
+
+            Console.WriteLine("Press Enter to stop...");
+            Console.ReadLine();
+
+            spawner.Stop();
+        }
+    }
+}
