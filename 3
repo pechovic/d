@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# Read refs from stdin
+while read oldrev newrev refname; do
+    # Extract the branch name from the ref
+    branch=$(echo "$refname" | sed 's|refs/heads/||')
+
+    # Get the name of the user pushing the changes
+    pushing_user=$(git var GIT_AUTHOR_IDENT | cut -d ' ' -f 1)
+
+    # Get the list of authors for the new commits being pushed
+    commit_authors=$(git rev-list "$oldrev..$newrev" --pretty=format:"%an" | grep -v '^commit')
+
+    # Check if the pushing user is in the list of commit authors
+    if echo "$commit_authors" | grep -q "^$pushing_user$"; then
+        echo "ERROR: You cannot push changes to this branch because you are a contributor to the pull request."
+        echo "Please assign another reviewer or pusher for this branch."
+        exit 1
+    fi
+done
+
+exit 0
