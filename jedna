@@ -1,1 +1,32 @@
-hello
+# Path to the file containing hostnames (one per line)
+$hostnameFile = "C:\path\to\your\hostnames.txt"
+
+# Path to the output file for storing results
+$outputFile = "C:\path\to\resolved_IPs.txt"
+
+# Clear or create the output file
+New-Item -ItemType File -Path $outputFile -Force | Out-Null
+
+# Read hostnames from the file
+$hostnames = Get-Content -Path $hostnameFile
+
+# Resolve each hostname and get its IP address
+foreach ($hostname in $hostnames) {
+    try {
+        # Resolve IP
+        $ipAddresses = [System.Net.Dns]::GetHostAddresses($hostname) | ForEach-Object { $_.IPAddressToString }
+        # Format output
+        $result = "$hostname : $($ipAddresses -join ', ')"
+        # Write result to the output file
+        Add-Content -Path $outputFile -Value $result
+        # Optional: Display the result in the console
+        Write-Output $result
+    } catch {
+        # Handle errors (e.g., unresolved hostnames)
+        $errorResult = "$hostname : Resolution Failed"
+        Add-Content -Path $outputFile -Value $errorResult
+        Write-Output $errorResult
+    }
+}
+
+Write-Output "IP resolution completed. Results saved to $outputFile"
