@@ -1,32 +1,50 @@
-# Path to the file containing hostnames (one per line)
-$hostnameFile = "C:\path\to\your\hostnames.txt"
-
-# Path to the output file for storing results
-$outputFile = "C:\path\to\resolved_IPs.txt"
-
-# Clear or create the output file
-New-Item -ItemType File -Path $outputFile -Force | Out-Null
-
-# Read hostnames from the file
-$hostnames = Get-Content -Path $hostnameFile
-
-# Resolve each hostname and get its IP address
-foreach ($hostname in $hostnames) {
-    try {
-        # Resolve IP
-        $ipAddresses = [System.Net.Dns]::GetHostAddresses($hostname) | ForEach-Object { $_.IPAddressToString }
-        # Format output
-        $result = "$hostname : $($ipAddresses -join ', ')"
-        # Write result to the output file
-        Add-Content -Path $outputFile -Value $result
-        # Optional: Display the result in the console
-        Write-Output $result
-    } catch {
-        # Handle errors (e.g., unresolved hostnames)
-        $errorResult = "$hostname : Resolution Failed"
-        Add-Content -Path $outputFile -Value $errorResult
-        Write-Output $errorResult
-    }
-}
-
-Write-Output "IP resolution completed. Results saved to $outputFile"
+Update ID (KB Number),Release Date
+KB5050008,2025-01-14
+KB5048661,2024-12-10
+KB5046615,2024-11-12
+KB5044277,2024-10-08
+KB5043050,2024-09-10
+KB5041578,2024-08-13
+KB5040430,2024-07-09
+KB5039217,2024-06-11
+KB5039705,2024-05-14
+KB5037765,2024-05-14
+KB5036896,2024-04-09
+KB5035849,2024-03-12
+KB5034768,2024-02-13
+KB5034127,2024-01-09
+KB5033371,2023-12-12
+KB5032196,2023-11-14
+KB5031361,2023-10-10
+KB5030214,2023-09-12
+KB5029247,2023-08-08
+KB5028168,2023-07-11
+KB5027222,2023-06-13
+KB5026362,2023-05-09
+KB5025229,2023-04-11
+KB5023702,2023-03-14
+KB5022840,2023-02-14
+KB5022286,2023-01-10
+KB5021237,2022-12-13
+KB5019966,2022-11-08
+KB5018419,2022-10-11
+KB5017315,2022-09-13
+KB5016623,2022-08-09
+KB5015811,2022-07-12
+KB5014692,2022-06-14
+KB5013941,2022-05-10
+KB5012647,2022-04-12
+KB5011503,2022-03-08
+KB5010351,2022-02-08
+KB5009557,2022-01-11
+KB5008218,2021-12-14
+KB5007206,2021-11-09
+KB5006672,2021-10-12
+KB5005568,2021-09-14
+KB5005030,2021-08-10
+KB5004244,2021-07-13
+KB5003646,2021-06-08
+KB5003171,2021-05-11
+KB5001342,2021-04-13
+KB5000822,2021-03-09
+KB4601345,2021-02-09
