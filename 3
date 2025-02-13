@@ -1,22 +1,45 @@
 #!/bin/bash
 
-# Read refs from stdin
+# List of branches to protect
+PROTECTED_BRANCHES_REGEX="^(release/.*)$"
+
+# Function to check if a commit is part of a pull request
+is_commit_part_of_pull_request() {
+  local commit=$1
+  local branch=$2
+
+  # Use Bitbucket API to check if the commit is part of a merged pull request
+  # Replace the following with actual Bitbucket API usage for your setup
+  # Example: using a REST API to query pull requests
+  local result=$(curl -s -u "$BITBUCKET_USER:$BITBUCKET_TOKEN" \
+    "http://<BITBUCKET_SERVER>/rest/api/1.0/projects/<PROJECT_KEY>/repos/<REPO_SLUG>/pull-requests?state=MERGED&limit=1000" |
+    jq ".values[] | select(.toRef.displayId == \"$branch\") | .commits.values[].id" | grep "$commit")
+
+  if [[ -n "$result" ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+# Loop through all refs being pushed
 while read oldrev newrev refname; do
-    # Extract the branch name from the ref
-    branch=$(echo "$refname" | sed 's|refs/heads/||')
+  # Extract the branch name from the refname
+  branch_name=$(echo "$refname" | sed 's|refs/heads/||')
 
-    # Get the name of the user pushing the changes
-    pushing_user=$(git var GIT_AUTHOR_IDENT | cut -d ' ' -f 1)
+  # Check if the branch is protected
+  if [[ "$branch_name" =~ $PROTECTED_BRANCHES_REGEX ]]; then
+    # Get all new commits being pushed
+    new_commits=$(git rev-list "$oldrev".."$newrev")
 
-    # Get the list of authors for the new commits being pushed
-    commit_authors=$(git rev-list "$oldrev..$newrev" --pretty=format:"%an" | grep -v '^commit')
-
-    # Check if the pushing user is in the list of commit authors
-    if echo "$commit_authors" | grep -q "^$pushing_user$"; then
-        echo "ERROR: You cannot push changes to this branch because you are a contributor to the pull request."
-        echo "Please assign another reviewer or pusher for this branch."
+    for commit in $new_commits; do
+      # Check if the commit is part of a pull request
+      if ! is_commit_part_of_pull_request "$commit" "$branch_name"; then
+        echo "Commit $commit is not part of a merged pull request. Push to $branch_name is denied."
         exit 1
-    fi
+      fi
+    done
+  fi
 done
 
 exit 0
